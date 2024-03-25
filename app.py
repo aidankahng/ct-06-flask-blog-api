@@ -24,7 +24,7 @@ def test():
 
 
 ## In terminal to run
-## flask --app hello run -p 5050
+## flask --app app run -p 5050
 ## if name is app.py:
 ## flask run
 
