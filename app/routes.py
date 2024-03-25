@@ -27,9 +27,15 @@ def get_posts():
 
 
 
-@app.route('/posts/<post_id>')
+@app.route('/posts/<int:post_id>')
 def get_post(post_id):
-    post = post_data[int(post_id)-1]
-    return post
+    print(post_id, type(post_id))
+    # get the post from fake post_data
+    posts = post_data
+    for post in posts:
+        if post['id'] == post_id:
+            return post
+    # If we loop through and can't find any such post we get an error:
+    return {'error': f"Post with an ID of {post_id} does not exist"}, 404
 
     
