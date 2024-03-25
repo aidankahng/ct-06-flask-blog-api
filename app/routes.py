@@ -38,4 +38,6 @@ def get_post(post_id):
     # If we loop through and can't find any such post we get an error:
     return {'error': f"Post with an ID of {post_id} does not exist"}, 404
 
-    
+@app.route('/posts', methods=['POST'])
+def create_posts():
+    return 'making posts'
