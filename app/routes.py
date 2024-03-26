@@ -1,13 +1,12 @@
-from flask import request
+from flask import request, render_template
 from app import app
 from fake_data.posts import post_data
 
 
 
 @app.route("/")
-def hello_world():
-    first = "John"
-    return f"Hello there {first}!"
+def index():
+    return render_template("index.html")
 
 
 @app.route("/test")
