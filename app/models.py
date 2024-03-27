@@ -14,6 +14,9 @@ class User(db.Model):
     username = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String, nullable=False)
     date_created = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
+    
+    # Create a link to the posts table
+    posts = db.relationship('Post', back_populates='author')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -44,7 +47,7 @@ class User(db.Model):
             "lastName" : self.last_name,
             "username" : self.username,
             "email" : self.email,
-            "dateCreated" : self.date_created
+            "dateCreated" : self.date_created            
         }
 
 # u = User(first_name="Bob", last_name="Dylan", email="bd@rad.com", username="thebobdylan", password="123")
@@ -56,6 +59,9 @@ class Post(db.Model):
     date_created = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     # In PgSQL - user_id INTEGER NOT NULL, FOREIGN KEY(user_id) REFERENCES user(id)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # Creates link to the user table 
+    author = db.relationship('User', back_populates='posts')
 
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
@@ -73,5 +79,6 @@ class Post(db.Model):
             "id" : self.id,
             "title" : self.title,
             "body" : self.body,
-            "dateCreated" : self.date_created
+            "dateCreated" : self.date_created,
+            "author" : self.author.to_dict()
         }
