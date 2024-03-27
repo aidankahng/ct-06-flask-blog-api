@@ -64,7 +64,14 @@ class Post(db.Model):
     def __repr__(self) -> str:
         return f"<Post {self.id}|{self.title}>"
 
-
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def to_dict(self):
+        return {
+            "id" : self.id,
+            "title" : self.title,
+            "body" : self.body,
+            "dateCreated" : self.date_created
+        }

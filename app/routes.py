@@ -1,9 +1,7 @@
 from flask import request, render_template
 from . import app, db
-from .models import User
-from fake_data.posts import post_data
+from .models import User, Post
 
-users = []
 
 @app.route("/")
 def index():
@@ -63,21 +61,21 @@ def test():
         my_dicts.append(a_dict)
     return my_dicts
 
-
+# Get all posts
 @app.route('/posts')
 def get_posts():
-    posts = post_data
-    return posts
+    # Get the posts from the database
+    posts = db.session.execute(db.select(Post)).scalars().all()
+    # return a list of dictionaries 
+    return [p.to_dict() for p in posts], 200
 
 
 @app.route('/posts/<int:post_id>')
 def get_post(post_id):
-    print(post_id, type(post_id))
-    # get the post from fake post_data
-    posts = post_data
-    for post in posts:
-        if post['id'] == post_id:
-            return post
+    # Get either a Post of post_id or None
+    post = db.session.get(Post, post_id)
+    if post: 
+        return post.to_dict()
     # If we loop through and can't find any such post we get an error:
     return {'error': f"Post with an ID of {post_id} does not exist"}, 404
 
@@ -102,18 +100,8 @@ def create_posts():
     title = data.get('title')
     body = data.get('body')
 
-    # Create a new post dictionary with the data
-    new_post = {
-        "id" : len(post_data) + 1,
-        "title" : title,
-        "body" : body,
-        "userId" : 1,
-        "dateCreated" : "2024-03-25T15:31:25",
-        "likes" : 0
-    }
+    # Create a new Post instance with data and adding to db (hard coded user_id for now)
+    new_post = Post(title=title, body=body, user_id=2)
 
-    # Add the new post to storage (post_data, will be a database later)
-    post_data.append(new_post)
-
-    # Return the newly created post dictionary with 201 status code
-    return new_post, 201
+    # Return the newly created Post as a dictionary with 201 status code
+    return new_post.to_dict(), 201
