@@ -64,8 +64,12 @@ def test():
 # Get all posts
 @app.route('/posts')
 def get_posts():
+    search = request.args.get('search')
+    select_stmt = db.select(Post)
+    if search:
+        select_stmt = select_stmt.where(Post.title.ilike('%' + search + '%'))
     # Get the posts from the database
-    posts = db.session.execute(db.select(Post)).scalars().all()
+    posts = db.session.execute(select_stmt).scalars().all()
     # return a list of dictionaries 
     return [p.to_dict() for p in posts], 200
 
