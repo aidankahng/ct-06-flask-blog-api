@@ -4,7 +4,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 # flask-igrate uses alembic to work with databases
 from flask_migrate import Migrate
-
 # Gets the Config from our locat config.py file/module
 from config import Config
 

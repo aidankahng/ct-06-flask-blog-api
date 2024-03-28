@@ -8,7 +8,7 @@ def index():
     return render_template("index.html")
 
 
-# User endpoints
+# User Endpoints
 
 # Create new user endpoint
 @app.route("/users", methods=["POST"])
@@ -61,7 +61,7 @@ def test():
         my_dicts.append(a_dict)
     return my_dicts
 
-# Get all posts
+# Get all posts / search for title match
 @app.route('/posts')
 def get_posts():
     search = request.args.get('search')
@@ -73,7 +73,7 @@ def get_posts():
     # return a list of dictionaries 
     return [p.to_dict() for p in posts], 200
 
-
+# Get single post by id
 @app.route('/posts/<int:post_id>')
 def get_post(post_id):
     # Get either a Post of post_id or None
@@ -83,7 +83,7 @@ def get_post(post_id):
     # If we loop through and can't find any such post we get an error:
     return {'error': f"Post with an ID of {post_id} does not exist"}, 404
 
-
+# Create a post
 @app.route('/posts', methods=['POST'])
 def create_posts():
     # Check if the request body is JSON
