@@ -1,6 +1,6 @@
 from flask import request, render_template
 from . import app, db
-from .models import User, Post
+from .models import User, Post, Comment
 from .auth import basic_auth, token_auth
 
 
@@ -133,7 +133,7 @@ def edit_post(post_id):
     # Now we need to find the post in the database
     post = db.session.get(Post, post_id) # will return None if no post exists
     if post is None:
-        return {'error' : f'Post with and id #{post_id} does not exist'}, 404
+        return {'error' : f'Post with an id #{post_id} does not exist'}, 404
     # verify that the person trying to make the change is the author
     # get the current user
     current_user = token_auth.current_user()
@@ -144,3 +144,72 @@ def edit_post(post_id):
     post.update(**data) # use of **unpacks data into kwargs
 
     return post.to_dict()
+
+# Delete Post
+@app.route('/posts/<int:post_id>', methods=["DELETE"])
+@token_auth.login_required
+def delete_post(post_id):
+    post = db.session.get(Post, post_id)
+    if post is None:
+        return {'error' : f"Post with an id #{post_id} does not exist"}, 404
+    # Need to verify that the user trying to delete post is the one who created it
+    current_user = token_auth.current_user()
+    if current_user is not post.author:
+        return {'error' : f"This is not your post. You do not have permission to delete"}, 403
+    
+    #delete the post
+    post.delete()
+    return {'success' : f"{post.title} was successfully deleted"}, 200
+
+# Comment Endpoints
+
+# Create a comment
+@app.route('/posts/<int:post_id>/comments', methods=["POST"])
+@token_auth.login_required
+def create_comment(post_id):
+    if not request.is_json:
+        return {'error' : "Your content-type must be application/json"}, 400
+    
+    post = db.session.get(Post, post_id)
+    if post is None:
+        return {'error' : f'Post with an id #{post_id} does not exist'}, 404
+    
+    data = request.json
+
+    required_fields = ["body"]
+    missing_fields = []
+    for field in required_fields:
+        if field not in data:
+            missing_fields.append(field)
+    # If there are any missing fields, return 400 error with missing fields listed
+    if missing_fields:
+        return {'error' : f"{', '.join(missing_fields)} must be in the request body"}, 400
+    
+    body = data.get('body')
+
+    current_user = token_auth.current_user()
+
+    new_comment = Comment(body=body, user_id=current_user.id, post_id=post.id)
+
+    return new_comment.to_dict(), 201
+
+# Delete a comment
+@app.route('/posts/<int:post_id>/comments/<int:comment_id>', methods=["DELETE"])
+@token_auth.login_required
+def delete_comment(post_id, comment_id):
+    post = db.session.get(Post, post_id)
+    comment = db.session.get(Comment, comment_id)
+    if post is None or comment is None:
+        return {'error' : f"Post #{post_id} or Comment #{comment_id} does not exist"}, 404
+        
+    current_user = token_auth.current_user()
+
+    if comment.user is not current_user:
+        return {"error" : "You do not have permission to delete this comment"}, 403
+    
+    if comment.post_id != post.id:
+        return {'error' : f"Comment #{comment_id} is not associated with Post #{post_id}"}, 400
+    
+    #delete the post
+    comment.delete()
+    return {'success' : f"Comment #{comment.id} was successfully deleted"}, 200
