@@ -1,6 +1,7 @@
 from flask import request, render_template
 from . import app, db
 from .models import User, Post
+from .auth import basic_auth, token_auth
 
 
 @app.route("/")
@@ -49,6 +50,14 @@ def create_user():
     return new_user.to_dict(), 201
 
 
+@app.route('/token')
+@basic_auth.login_required
+def get_token():
+    user = basic_auth.current_user()
+    return user.get_token()
+
+
+
 @app.route("/test")
 def test():
     my_dicts = []
@@ -85,6 +94,7 @@ def get_post(post_id):
 
 # Create a post
 @app.route('/posts', methods=['POST'])
+@token_auth.login_required
 def create_posts():
     # Check if the request body is JSON
     if not request.is_json:
@@ -104,8 +114,10 @@ def create_posts():
     title = data.get('title')
     body = data.get('body')
 
+    current_user = token_auth.current_user()
+
     # Create a new Post instance with data and adding to db (hard coded user_id for now)
-    new_post = Post(title=title, body=body, user_id=2)
+    new_post = Post(title=title, body=body, user_id=current_user.id)
 
     # Return the newly created Post as a dictionary with 201 status code
     return new_post.to_dict(), 201
