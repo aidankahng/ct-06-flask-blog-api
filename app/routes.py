@@ -57,7 +57,6 @@ def get_token():
     return user.get_token()
 
 
-
 @app.route("/test")
 def test():
     my_dicts = []

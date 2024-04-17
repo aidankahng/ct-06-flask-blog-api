@@ -6,18 +6,23 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 # Gets the Config from our locat config.py file/module
 from config import Config
+# To allow for Cross Origin Resource Sharing to help talk with React
+from flask_cors import CORS
 
 
 # create instance of Flask
 app = Flask(__name__, instance_relative_config=True)
 
-#set config for app and sql database
+# set config for app and sql database
 app.config.from_object(Config)
+
+# Setup CORS
+CORS(app)
 
 # create an instance of SQLAlchemy called db
 db = SQLAlchemy(app)
 
-#create an instance of Migrate with the app and db
+# create an instance of Migrate with the app and db
 migrate = Migrate(app, db)
 
 # need to import the routes to the application
